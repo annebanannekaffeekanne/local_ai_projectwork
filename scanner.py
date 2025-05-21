@@ -1,5 +1,6 @@
 import os
 import fitz
+from preprocessing import preprocess_texts, chunk_texts
 
 ## _____________________________________________________________________________________________________________
 # extract text from pdf files
@@ -43,17 +44,20 @@ def scan_directory(base_path):
                 # depending on file type extract text with the fitting function
                 content = extract_text_from_pdf(full_path) if ext == ".pdf" else extract_text_from_md(full_path)
                 if content:
+                    preprocessed_content = preprocess_texts(content)
+                    chunks = chunk_texts(preprocessed_content)
+
                     last_modified = os.path.getmtime(full_path)
                     # if text's been extracted
                     docs.append({
                         # save path to file
                         "path": full_path,
                         # save extracted text
-                        "content": content,
+                        "content": chunks,
                         "last_modified": last_modified
                     })
     # return list of all docs that've been found and read
     return docs
 
-BASE_PATH = "/data"
-docs = scan_directory(BASE_PATH)
+#BASE_PATH = "/data"
+#docs = scan_directory(BASE_PATH)
