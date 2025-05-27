@@ -6,6 +6,8 @@ services:
     container_name: updater
     volumes:
       - .:/app
-      - /Users/anne/Documents:/data
+      - DOC_BASE_PATH=/data
+      - ./models/sentence-transformers/all-MiniLM-L6-v2:/app/models/all-MiniLM-L6-v2
     working_dir: /app
     command: ["python", "updater.py"]
+    restart: always

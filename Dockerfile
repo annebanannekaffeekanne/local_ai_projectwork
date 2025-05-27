@@ -5,7 +5,15 @@ RUN apt-get update && apt-get install -y cron build-essential python3-dev
 WORKDIR /app
 
 COPY requirements.txt .
+
+# Install numpy first to ensure binary compatibility
+RUN pip install numpy==2.2.5
+
+# Install the rest of the requirements
 RUN pip install -r requirements.txt
+
+# Download NLTK data
+RUN python -m nltk.downloader punkt stopwords wordnet
 
 COPY . .
 

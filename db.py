@@ -1,5 +1,10 @@
+from encodings import normalize_encoding
+#from scanner import scan_directory
 import chromadb
 from sentence_transformers import SentenceTransformer
+from sentence_transformers.util import normalize_embeddings
+import os
+
 
 ## _____________________________________________________________________________________________________________
 # connect to chroma persistent database in the given directory
@@ -7,16 +12,17 @@ chroma_client = chromadb.PersistentClient(path="./chroma_db")
 # fetch existing collection or create new
 collection = chroma_client.get_or_create_collection(name="documents")
 # loads language model for the embeddings
-model = SentenceTransformer("intfloat/e5-base")
+model = SentenceTransformer("/Users/anne/PycharmProjects/local_ai/models/sentence-transformers/all-MiniLM-L6-v2")
 
 ## _____________________________________________________________________________________________________________
 # function that adds new docs to the database
 def index_documents(docs):
     for doc in docs:
+        print(f"➕ Indexiere: {doc['path']}")
         # use path as id
         doc_id = doc["path"]
         # create embedding fot the text
-        embedding = model.encode(f"passage: {doc['content']}")
+        embedding = model.encode(doc['content'], normalize_embeddings=True)
         collection.add(
             # save actual text
             documents=[doc["content"]],
@@ -27,6 +33,9 @@ def index_documents(docs):
             # vector embedding for search
             embeddings=[embedding]
         )
+        print("dokumente in der collection:", len(collection.get()['documents']))
+    print(f"📦 Insgesamt in Collection: {len(collection.get()['documents'])}")
+    return
 
 # ------------------------------------------------------------------------
 # function to delete doc from database based on its path
@@ -52,7 +61,9 @@ def update_docs(docs):
     to_delete = list(existing_paths - new_paths)
     # update
     to_update = [doc for doc in docs if doc["path"] in existing_paths]
-
+    print(f"🔍 Neue Dokumente: {len(new_docs)}")
+    print(f"🧹 Zu löschende Dokumente: {len(to_delete)}")
+    print(f"♻️ Zu aktualisierende Dokumente: {len(to_update)}")
     for path in to_delete:
         delete_doc_path(path)
 
@@ -63,4 +74,16 @@ def update_docs(docs):
         index_documents([doc])
     # insert new docs
     index_documents(new_docs)
+    print("✅ Update abgeschlossen.")
+    return
 
+
+
+if __name__ == '__main__':
+    print("test")
+    from scanner import scan_directory
+    BASE_PATH = os.environ.get("DOC_BASE_PATH", "/Users/anne/Documents")
+    #collection.delete()
+    docs = scan_directory(BASE_PATH)
+    #docs = index_documents(docs)
+    print(len(docs))

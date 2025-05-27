@@ -1,10 +1,12 @@
 import time
-import logging
-import sys
 import os
+import sys
+import logging
+from pathlib import Path
 from scanner import scan_directory
-from db import update_docs, delete_doc_path, list_paths, collection
+from db import update_docs, delete_doc_path, collection
 
+# Logging Setup
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -14,15 +16,25 @@ logging.basicConfig(
     ]
 )
 
-BASE_PATH = "/data"
-if not os.path.exists(BASE_PATH):
-    try:
-        os.makedirs(BASE_PATH)
-        logging.info(f"created documents directory at {BASE_PATH}")
-    except Exception as e:
-        logging.error(f"failed to create documents directory: {e}")
+# Basis-Pfad ermitteln
+BASE_PATH = os.environ.get("DOC_BASE_PATH")
+if not BASE_PATH:
+    # fallback auf ~/Documents/my_docs
+    BASE_PATH = str(Path.home() / "Documents")
+    logging.warning(f"DOC_BASE_PATH not set. Falling back to default: {BASE_PATH}")
+else:
+    logging.info(f"Using DOC_BASE_PATH from environment: {BASE_PATH}")
+
+# Pfad validieren
+if not os.path.isdir(BASE_PATH):
+    logging.error(f"Base path '{BASE_PATH}' is not a directory or not accessible.")
+    sys.exit(1)
+else:
+    logging.info(f"Base path '{BASE_PATH}' exists and is accessible.")
+
 
 def run_update():
+    logging.info("ENTERED run_update() function")
     logging.info("scheduled update started...")
     try:
         # docs sind jetzt dicts mit path, content und last_modified
@@ -82,11 +94,12 @@ if __name__ == "__main__":
     logging.info("background updater running. press ctrl+c to stop")
     logging.info("running initial update...")
     run_update()
+    logging.info(f"Checking BASE_PATH: {BASE_PATH}")
+    logging.info(f"Files in BASE_PATH: {os.listdir(BASE_PATH)}")
     logging.info("starting scheduler loop...")
 
     while True:
         try:
-            # Einfach alle 24h
             time.sleep(3600*24)
             run_update()
         except Exception as e:

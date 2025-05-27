@@ -1,6 +1,9 @@
 import os
 import fitz
 from preprocessing import preprocess_texts, chunk_texts
+import logging
+import nltk
+
 
 ## _____________________________________________________________________________________________________________
 # extract text from pdf files
@@ -35,6 +38,8 @@ def scan_directory(base_path):
     docs = []
     # recursive iteration over all directories and files below the base directory
     for root, _, files in os.walk(base_path):
+        logging.info(f"Scanning directory: {root}")
+        logging.info(f"Found files: {files}")
         for file in files:
             # extract file ending (.pdf,..)
             ext = os.path.splitext(file)[1].lower()
@@ -53,11 +58,13 @@ def scan_directory(base_path):
                         # save path to file
                         "path": full_path,
                         # save extracted text
-                        "content": chunks,
+                        "content": " ".join(chunks),
                         "last_modified": last_modified
                     })
     # return list of all docs that've been found and read
     return docs
 
-#BASE_PATH = "/data"
-#docs = scan_directory(BASE_PATH)
+if __name__ == '__main__':
+    BASE_PATH = os.environ.get("DOC_BASE_PATH", "/Users/anne/Documents")
+    docs = scan_directory(BASE_PATH)
+    print(len(docs))
