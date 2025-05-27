@@ -1,9 +1,8 @@
+# import necessary libraries and methods form files
 import os
 import fitz
 from preprocessing import preprocess_texts, chunk_texts
 import logging
-import nltk
-
 
 ## _____________________________________________________________________________________________________________
 # extract text from pdf files
@@ -64,6 +63,8 @@ def scan_directory(base_path):
     # return list of all docs that've been found and read
     return docs
 
+## _____________________________________________________________________________________________________________
+# check if working
 if __name__ == '__main__':
     BASE_PATH = os.environ.get("DOC_BASE_PATH", "/Users/anne/Documents")
     docs = scan_directory(BASE_PATH)

@@ -1,36 +1,23 @@
-from db import model, collection, list_paths
-
-# semantic search: fetch most relevant docs for user inquiry
-def _retrieve_relevant_docs(query, top_k=3):
-    # convert inquiry to embedding
-    query_embedding = model.encode(query, normalize_embeddings=True).tolist()
-    results = collection.query(query_embeddings=[query_embedding], n_results=top_k)
-    # return best docs if existing.. if not empty list
-
-    documents = results.get("documents", [[]])
-    if documents and documents[0]:
-        return documents[0]
-    else:
-        return []
+# import necessary libraries and methods from files
+from db import model, collection
 from pprint import pprint
+import subprocess
 
+## _____________________________________________________________________________________________________________
 def retrieve_relevant_docs(query, top_k=3):
-    # DEBUG: Gib aktuelle Collection-Inhalte aus
     all_docs = collection.get()
-    print("\n🧠 Datenbankinhalte:")
+    print("\ndatabase content:")
     for i, (doc, meta) in enumerate(zip(all_docs["documents"], all_docs["metadatas"])):
         print(f"{i+1}. {meta['path']} | {doc[:80]}...")
 
-    # Query-Vektor erzeugen (ohne "query:"-Prefix)
-    query_embedding = model.encode(query).tolist()
+    query_embedding = model.encode(query, normalize_embeddings=True).tolist()
 
-    print("\n🔍 Query:", query)
-    print("📏 Query-Vektor Beispiel:", query_embedding[:5], "...")
+    print("\nquery:", query)
+    print("query-vector example:", query_embedding[:5], "...")
 
-    # Ähnliche Dokumente abrufen
     results = collection.query(query_embeddings=[query_embedding], n_results=top_k)
 
-    print("\n📊 Treffer-Ergebnisse:")
+    print("\nresults:")
     pprint(results)
 
     if results["documents"]:
@@ -38,7 +25,32 @@ def retrieve_relevant_docs(query, top_k=3):
     else:
         return []
 
+## _____________________________________________________________________________________________________________
+def retrieve_with_paths(query, top_k=5):
+    query_embedding = model.encode(query, normalize_embeddings=True)
+    results = collection.query(query_embeddings=[query_embedding], n_results=top_k)
 
-docs = retrieve_relevant_docs("werkstoffkunde skript", top_k=3)
-for i, doc in enumerate(docs):
-    print(f"[{i+1}] {doc[:200]}...")
+    docs = results["documents"][0]
+    paths = results["metadatas"][0]
+    scores = results["distances"][0]
+
+    combined = []
+    for doc, meta, score in zip(docs, paths, scores):
+        combined.append({
+            "content": doc,
+            "path": meta.get("path", "unknown"),
+            "score": score
+        })
+    return combined
+
+
+
+#docs = retrieve_relevant_docs("werkstoffkunde skript", top_k=3)
+#for i, doc in enumerate(docs):
+#    print(f"[{i+1}] {doc[:200]}...")
+if __name__ == '__main__':
+    for i, res in enumerate(retrieve_with_paths("thailand flight"), 1):
+        print(f"{i}. {res['path']}")
+        print(f"score: {res['score']:.4f}")
+        print(f"preview: {res['content'][:120]}...\n")
+        subprocess.run(["open", res['path']])
