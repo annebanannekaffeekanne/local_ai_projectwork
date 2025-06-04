@@ -3070,3 +3070,5 @@
 2025-05-27 11:13:24,769 - WARNING - DOC_BASE_PATH not set. Falling back to default: /Users/anne/Documents
 2025-05-27 11:13:24,770 - INFO - Base path '/Users/anne/Documents' exists and is accessible.
 2025-05-27 11:13:24,895 - DEBUG - https://us.i.posthog.com:443 "POST /batch/ HTTP/1.1" 200 15
+2025-05-29 11:11:43,932 - INFO - scheduled update started...
+2025-05-29 11:13:34,937 - ERROR - error during scheduled update: Database error: error returned from database: (code: 1) no such table: collections

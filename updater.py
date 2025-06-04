@@ -22,16 +22,16 @@ logging.basicConfig(
 BASE_PATH = os.environ.get("DOC_BASE_PATH")
 if not BASE_PATH:
     BASE_PATH = str(Path.home() / "Documents")
-    logging.warning(f"DOC_BASE_PATH not set. Falling back to default: {BASE_PATH}")
+    logging.warning(f"DOC_BASE_PATH not set. falling back to default: {BASE_PATH}")
 else:
-    logging.info(f"Using DOC_BASE_PATH from environment: {BASE_PATH}")
+    logging.info(f"using DOC_BASE_PATH from environment: {BASE_PATH}")
 
 #
 if not os.path.isdir(BASE_PATH):
-    logging.error(f"Base path '{BASE_PATH}' is not a directory or not accessible.")
+    logging.error(f"base path '{BASE_PATH}' is not a directory or not accessible.")
     sys.exit(1)
 else:
-    logging.info(f"Base path '{BASE_PATH}' exists and is accessible.")
+    logging.info(f"base path '{BASE_PATH}' exists and is accessible.")
 
 ## _____________________________________________________________________________________________________________
 def run_update():
@@ -74,7 +74,7 @@ def run_update():
 
         # delete
         for path in docs_to_delete:
-            logging.info(f"deleting removed doc from DB: {path}")
+            logging.info(f"deleting removed doc from db: {path}")
             delete_doc_path(path)
 
         # update
@@ -93,8 +93,8 @@ if __name__ == "__main__":
     logging.info("background updater running. press ctrl+c to stop")
     logging.info("running initial update...")
     run_update()
-    logging.info(f"Checking BASE_PATH: {BASE_PATH}")
-    logging.info(f"Files in BASE_PATH: {os.listdir(BASE_PATH)}")
+    logging.info(f"checking BASE_PATH: {BASE_PATH}")
+    logging.info(f"files in BASE_PATH: {os.listdir(BASE_PATH)}")
     logging.info("starting scheduler loop...")
 
     # ------------------------------------------------------------------------
